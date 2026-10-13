@@ -1,7 +1,7 @@
 # AI Powered In-car Assistant
 
 An AI assistant capable of receiving your vehicle telemetry to propose personally-tailored routes. <br>
-Project written in Python 3.13 (backend), .... (frontend)
+Project written in Python 3.13 (backend), React + Vite (frontend)
 
 ## Requirements
 
