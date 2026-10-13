@@ -5,21 +5,8 @@ Project written in Python 3.13 (backend), React + Vite (frontend)
 
 ## Requirements
 
-The user must have installed the following: <br>
-*backend*
-
-* **uv**
-* **Python 3.13**
-* **dotenv**
-* **sqlalchemy**
-* **OpenAI** (functional key required)
-* **Pydantic** and EmailStr
-* **xgboost**
-* **jwt**
-* **sklearn**
-
-*frontend*
-* Node.js
+* **Backend:** Python 3.13, `uv`, SQL Server, and Microsoft ODBC Driver 17 for SQL Server
+* **Frontend:** Node.js and npm
 
 ## Frontend
 
@@ -75,39 +62,51 @@ are excluded from version control. Use `.env.example` as the safe configuration 
 
 ## Backend
 
-...
+The backend is a FastAPI application in `backend/`. Its routers expose the HTTP API;
+services implement assistant, conversation, route, vehicle, and trip behavior; and
+repositories persist domain data in SQL Server.
 
+### Backend requirements
 
-## Installation guide
+* Python 3.13
+* [`uv`](https://docs.astral.sh/uv/)
+* SQL Server and the Microsoft ODBC Driver 17 for SQL Server
+* Geoapify API key for routing, places, and geocoding requests
 
-Before executing the commands written below, the user must have a functional OpenAI key stored in a .env file. The .env file must be in the same directory as the project (SmartLibrarian).<br>
-Recommended : ensure it is in .gitignore, to avoid exposing the key.
+### Backend setup
 
-```powershell
-cd .\<repo-name>\
-# if uv is not installed, run this
-powershell -ExecutionPolicy Bypass -c "irm https://astral.sh/uv/install.ps1 | iex"
-# restart terminal then cd to project again to install python
-uv python install 3.13
-uv venv --python 3.13.14
-uv pip install --python .venv\Scripts\python.exe requirements
-```
-
-Check if environment is in .venv\Scripts\python.exe <br>
-If found, select interpretor (CTRL + SHIFT + P) : 'project_root'\.venv\Scripts\python.exe <br>
-Finally, run this:
+Run these commands from the repository root in PowerShell:
 
 ```powershell
-# in case u havent already
-cd .\<repo-name>\
-# run this only if powershell does not allow
-Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
-.venv\Scripts\Activate.ps1
+uv sync
+Copy-Item .env.example .env
 ```
 
-To run any program, ensure you type in powershell first in project main directory:
+Edit the root `.env` and configure the required SQL Server credentials
+(`DB_USER` and `DB_PASSWORD`), a private `JWT_SECRET_KEY`, and `GEOAPIFY_API_KEY`.
+Set `DB_SERVER`, `DB_PORT`, `DB_NAME`, and `DB_DRIVER` if your SQL Server differs
+from the defaults. Set `FUEL_PRICE` (per litre) and `ELECTRICITY_PRICE` (per kWh)
+in the same currency if route cost estimates are needed. Keep `.env` private; use
+`.env.example` as the shareable template.
+
+Apply the SQL Server migrations in order before using conversation and trip flows:
+
+1. `database/001_add_trip_route_and_status.sql`
+2. `database/002_assistant_state.sql`
+
+### Run and verify the backend
+
 ```powershell
-$env:PYTHONPATH = (Get-Location).Path
+# Start FastAPI with reload enabled
+uv run uvicorn backend.main:app --reload --host 127.0.0.1 --port 8000
+
+# Open the interactive API documentation
+# http://127.0.0.1:8000/docs
+
+# Run the backend tests
+uv run pytest
 ```
 
-Finished!
+The backend loads configuration from the repository-root `.env`. The frontend's
+`VITE_BACKEND_BASE_URL` should point to the running API, for example
+`http://127.0.0.1:8000`.
