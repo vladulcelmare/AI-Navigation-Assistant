@@ -1,4 +1,11 @@
 # Byte-compiled / optimized / DLL files
+.env.*
+!.env.example
+.uv-cache/
+.ruff_cache/
+node_modules/
+outputs/
+
 __pycache__/
 *.py[codz]
 *$py.class
